@@ -17,8 +17,9 @@ services:
         value: sandbox64b84171150447e2a8964210a106f64a.mailgun.org
 
   # 2. Das Frontend (React Website)
-  - type: static
+  - type: web
     name: dart-frontend
+    env: static
     region: frankfurt
     rootDir: client         # WICHTIG: Hier liegt dein Frontend-Code!
     buildCommand: npm install && npm run build

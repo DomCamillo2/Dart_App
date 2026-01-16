@@ -5,7 +5,8 @@ services:
     runtime: docker
     region: frankfurt
     plan: free
-    rootDir: server_python  # WICHTIG: Hier liegt dein Backend-Code und das Dockerfile!
+    rootDir: server_python
+    dockerfilePath: Dockerfile
     envVars:
       - key: DATABASE_URL
         fromDatabase:

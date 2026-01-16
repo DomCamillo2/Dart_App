@@ -6,7 +6,7 @@ services:
     region: frankfurt
     plan: free
     rootDir: server_python
-    dockerfilePath: Dockerfile
+    dockerfilePath: server_python/Dockerfile
     envVars:
       - key: DATABASE_URL
         fromDatabase:

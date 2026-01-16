@@ -23,12 +23,13 @@ services:
     rootDir: client         # WICHTIG: Hier liegt dein Frontend-Code!
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: dart-backend
-          property: host
+    # Wir setzen die URL manuell im Dashboard, da die automatische Verknüpfung nur die interne URL liefert.
+    # envVars:
+    #   - key: VITE_API_URL
+    #     fromService:
+    #       type: web
+    #       name: dart-backend
+    #       property: host
 
 databases:
   - name: dart-db

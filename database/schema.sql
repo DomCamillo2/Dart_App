@@ -1,14 +1,16 @@
 -- TABLE: players
 -- Stores user identities.
-CREATE TABLE players (
+CREATE TABLE IF NOT EXISTS players (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
+  email TEXT UNIQUE,
+  password_hash TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- TABLE: games
 -- Represents a match (e.g., 501 Best of 3).
-CREATE TABLE games (
+CREATE TABLE IF NOT EXISTS games (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   start_score INT NOT NULL DEFAULT 501, -- 301 or 501
   is_finished BOOLEAN DEFAULT FALSE,
@@ -18,7 +20,7 @@ CREATE TABLE games (
 
 -- TABLE: game_participants
 -- Links players to a game and defines turn order.
-CREATE TABLE game_participants (
+CREATE TABLE IF NOT EXISTS game_participants (
   game_id UUID REFERENCES games(id),
   player_id UUID REFERENCES players(id),
   turn_order INT NOT NULL, -- 1, 2, ...
@@ -27,7 +29,7 @@ CREATE TABLE game_participants (
 
 -- TABLE: throws
 -- THE CORE: Stores every single dart thrown.
-CREATE TABLE throws (
+CREATE TABLE IF NOT EXISTS throws (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id UUID REFERENCES games(id),
   player_id UUID REFERENCES players(id),

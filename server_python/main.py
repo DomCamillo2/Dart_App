@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
-from database import get_db_connection
+from database import get_db_connection, init_db
 from models import GameCreate, ThrowInput, UserRegister, UserLogin, ForgotPasswordRequest, ResetPasswordRequest
 import uuid
 from passlib.context import CryptContext
@@ -21,6 +21,10 @@ MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN", "sandbox64b84171150447e2a8964210a10
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY", "API_KEY") # You should set this in docker-compose or .env
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 # Switch to pbkdf2_sha256 to avoid bcrypt 72 byte limit issues on some systems/versions
 pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")

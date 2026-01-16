@@ -14,51 +14,53 @@ def get_db_connection():
     return conn
 
 def init_db():
-    schema = """
-    -- TABLE: players
-    CREATE TABLE IF NOT EXISTS players (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      name TEXT NOT NULL,
-      email TEXT UNIQUE,
-      password_hash TEXT,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-
-    -- TABLE: games
-    CREATE TABLE IF NOT EXISTS games (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      start_score INT NOT NULL DEFAULT 501,
-      is_finished BOOLEAN DEFAULT FALSE,
-      winner_id UUID REFERENCES players(id),
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-
-    -- TABLE: game_participants
-    CREATE TABLE IF NOT EXISTS game_participants (
-      game_id UUID REFERENCES games(id),
-      player_id UUID REFERENCES players(id),
-      turn_order INT NOT NULL,
-      PRIMARY KEY (game_id, player_id)
-    );
-
-    -- TABLE: throws
-    CREATE TABLE IF NOT EXISTS throws (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      game_id UUID REFERENCES games(id),
-      player_id UUID REFERENCES players(id),
-      round_number INT NOT NULL,
-      throw_number INT NOT NULL,
-      score_value INT NOT NULL,
-      multiplier INT NOT NULL,
-      total_score INT GENERATED ALWAYS AS (score_value * multiplier) STORED,
-      is_bust BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-    """
+    statements = [
+        """
+        CREATE TABLE IF NOT EXISTS players (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          email TEXT UNIQUE,
+          password_hash TEXT,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS games (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          start_score INT NOT NULL DEFAULT 501,
+          is_finished BOOLEAN DEFAULT FALSE,
+          winner_id UUID REFERENCES players(id),
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS game_participants (
+          game_id UUID REFERENCES games(id),
+          player_id UUID REFERENCES players(id),
+          turn_order INT NOT NULL,
+          PRIMARY KEY (game_id, player_id)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS throws (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          game_id UUID REFERENCES games(id),
+          player_id UUID REFERENCES players(id),
+          round_number INT NOT NULL,
+          throw_number INT NOT NULL,
+          score_value INT NOT NULL,
+          multiplier INT NOT NULL,
+          total_score INT GENERATED ALWAYS AS (score_value * multiplier) STORED,
+          is_bust BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+        """
+    ]
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(schema)
+                for stmt in statements:
+                    cur.execute(stmt)
             conn.commit()
         print("Database initialized successfully.")
     except Exception as e:

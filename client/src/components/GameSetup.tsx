@@ -79,8 +79,9 @@ const GameSetup = () => {
         
         startGame(data.game_id, playersForStore, score)
         
-    } catch (e) {
-        alert('Error starting game server connection')
+    } catch (e: any) {
+        console.error(e)
+        alert(`Connection Error: ${e.message}\nTarget: ${API_URL}/api/games`)
     } finally {
         setLoading(false)
     }

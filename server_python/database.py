@@ -4,6 +4,11 @@ from psycopg.rows import dict_row
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/dart_app")
 
+# Fix Render's "postgres://" scheme if necessary for some drivers, 
+# though psycopg 3 usually handles it.
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 def get_db_connection():
     conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
     return conn

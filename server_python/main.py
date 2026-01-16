@@ -58,7 +58,7 @@ def get_current_user_id(authorization: Optional[str] = Header(None)):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -429,6 +429,3 @@ def undo_last_throw(game_id: uuid.UUID):
             cur.execute("DELETE FROM throws WHERE id = %s", (row['id'],))
             conn.commit()
             return {"status": "undone"}
-            
-            conn.commit()
-            return {"status": "recorded", "points": total_points}

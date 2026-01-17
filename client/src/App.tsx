@@ -9,9 +9,11 @@ import AuthScreen from './components/AuthScreen'
 import { API_URL } from './config'
 
 function App() {
-  const { gameId, players, currentPlayerIndex, updateScore, nextTurn, setWinner } = useGameStore()
+  const { gameId, players, currentPlayerIndex, updateScore, nextTurn, setWinner, resetGame } = useGameStore()
   const { user, isGuest, login, setGuest, logout } = useAuthStore()
   const [dartsThrown, setDartsThrown] = useState<number>(0)
+  const [lastThrows, setLastThrows] = useState<{ player: string; value: number; multiplier: number; isBust?: boolean; isWin?: boolean }[]>([])
+  const [turnStartScore, setTurnStartScore] = useState<number | null>(null)
   
   // Simple backend sync logic (Polling)
   useEffect(() => {
@@ -27,42 +29,64 @@ function App() {
     return () => clearInterval(interval)
   }, [gameId])
 
+  // Reset local throw log when starting/ending a game
+  useEffect(() => {
+    setLastThrows([])
+    setDartsThrown(0)
+  }, [gameId])
+
+  // Capture score at the start of each player's turn so busts can revert correctly
+  useEffect(() => {
+    if (!gameId) return
+    const current = players[currentPlayerIndex]
+    if (current) {
+      setTurnStartScore(current.score)
+      setDartsThrown(0)
+    }
+    // Intentionally not including players to avoid resetting mid-turn when scores update
+  }, [gameId, currentPlayerIndex])
+
   const handleThrow = async (multiplier: number, value: number) => {
     if (!gameId) return
     
     // 1. Calculate Score
     const points = multiplier * value
     const currentPlayer = players[currentPlayerIndex]
+    const startingScore = turnStartScore ?? currentPlayer.score
     
     // Bust Logic (Simplified for UI)
     const newScore = currentPlayer.score - points
     
+    const throwEntry = { player: currentPlayer.name, value, multiplier, isBust: false, isWin: false }
+
     if (newScore === 0) {
-        // WINNER
-        // Update score to 0
-        updateScore(currentPlayer.id, 0)
-        // Trigger Win State
-        setWinner({ ...currentPlayer, score: 0 })
-        // Send to backend (last throw)
-        fetch(`${API_URL}/api/games/${gameId}/throw`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ score_value: value, multiplier: multiplier })
-        }).catch(e => console.error(e))
-        
-        return; // End flow here
+      updateScore(currentPlayer.id, 0)
+      setWinner({ ...currentPlayer, score: 0 })
+      throwEntry.isWin = true
+      fetch(`${API_URL}/api/games/${gameId}/throw`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ score_value: value, multiplier: multiplier })
+      }).catch(e => console.error(e))
+      setLastThrows(prev => [throwEntry, ...prev].slice(0, 6))
+      return
     }
 
     if (newScore < 0 || newScore === 1) {
-       alert("BUST!")
-       // Reset turn would imply reverting 3 darts. 
-       // For this MVP, we just don't substract score and move to next throw?
-       // Actually user expects standard rules: Turn ends immediately, score resets to start of turn.
-       // That requires tracking 'scoreAtStartOfTurn'. 
-       // Keeping it simple: Just ignore this throw for now.
-    } else {
-        updateScore(currentPlayer.id, newScore)
+      throwEntry.isBust = true
+      fetch(`${API_URL}/api/games/${gameId}/throw`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ score_value: value, multiplier: multiplier })
+      }).catch(e => console.error(e))
+      updateScore(currentPlayer.id, startingScore)
+      setLastThrows(prev => [throwEntry, ...prev].slice(0, 6))
+      setDartsThrown(0)
+      nextTurn()
+      return
     }
+
+    updateScore(currentPlayer.id, newScore)
 
     // 2. Send to Backend
     fetch(`${API_URL}/api/games/${gameId}/throw`, {
@@ -70,6 +94,8 @@ function App() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ score_value: value, multiplier: multiplier })
     })
+
+    setLastThrows(prev => [throwEntry, ...prev].slice(0, 6))
 
     // 3. Turn Management
     const nextDartCount = dartsThrown + 1
@@ -81,11 +107,7 @@ function App() {
     }
   }
 
-  const handleUndo = () => {
-      // Logic for undoing last throw
-      // Requires stack history
-      alert("Undo not implemented in MVP yet")
-  }
+  // Hide undo for now to avoid misleading users
 
   if (!gameId && !user && !isGuest) {
      return <AuthScreen onLogin={(token, username, id) => login({ token, username, id })} onGuest={setGuest} />
@@ -130,12 +152,30 @@ function App() {
         <div className="relative z-10 flex-1 flex flex-col items-center gap-4 w-full max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
             {/* Header / Status Bar */}
             <div className="w-full flex justify-between items-center px-4 py-3 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl">
-                 <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                  <button
+                   onClick={resetGame}
+                   className="text-left text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 hover:from-green-100 hover:to-emerald-200 transition-colors"
+                   aria-label="Back to start"
+                  >
                     DART <span className="text-green-500">X01</span>
-                 </h1>
+                  </button>
                  <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
                     <span className="text-xs font-mono font-bold text-slate-500">Match #{gameId.slice(0, 4)}</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <button
+                      onClick={resetGame}
+                      className="text-[11px] font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      Return
+                    </button>
+                    <button
+                      onClick={resetGame}
+                      className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-slate-950 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.8)]"
+                    >
+                      New Game
+                    </button>
                  </div>
             </div>
 
@@ -165,7 +205,36 @@ function App() {
            </div>
 
            <div className="flex-1 w-full flex items-end pb-4">
-                <Keypad onThrow={handleThrow} onUndo={handleUndo} />
+                <Keypad onThrow={handleThrow} />
+           </div>
+
+           {/* Recent Throws */}
+           <div className="w-full max-w-lg bg-slate-900/40 border border-white/5 rounded-2xl p-4 mt-2 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                 <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Recent Throws</span>
+                 <span className="text-[10px] text-slate-500">Last {lastThrows.length} dart(s)</span>
+              </div>
+              {lastThrows.length === 0 ? (
+                <p className="text-xs text-slate-600">No throws yet.</p>
+              ) : (
+                <ul className="space-y-1 text-sm font-mono text-slate-200">
+                  {lastThrows.map((t, idx) => {
+                    const prefix = t.multiplier === 3 ? 'T' : t.multiplier === 2 ? 'D' : ''
+                    const tag = t.isWin ? 'WIN' : t.isBust ? 'BUST' : ''
+                    return (
+                      <li key={idx} className="flex justify-between items-center bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-1">
+                        <span className="text-slate-300">{t.player}</span>
+                        <span className="text-slate-100">{prefix || 'S'}{t.value}</span>
+                        {tag && (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${t.isWin ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-red-500/10 text-red-300 border border-red-500/20'}`}>
+                            {tag}
+                          </span>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
            </div>
            
         </div>

@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge'
 
 interface KeypadProps {
   onThrow: (multiplier: number, value: number) => void
-  onUndo: () => void
+  onUndo?: () => void
 }
 
 const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
@@ -44,7 +44,11 @@ const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
           : `${color} border-[rgba(255,255,255,0.1)] text-white/90 hover:brightness-110 shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]`
       )}
     >
-      <span className="relative z-10">{label}</span>
+      <span className="relative z-10 flex items-center gap-1">
+        {label === 'Double' && <span aria-hidden>×2</span>}
+        {label === 'Triple' && <span aria-hidden>×3</span>}
+        {label}
+      </span>
       {multiplier === val && <div className="absolute inset-0 bg-white/50 animate-pulse"></div>}
     </button>
   )
@@ -77,16 +81,18 @@ const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
         <MultiplierBtn val={3} label="Triple" color="bg-gradient-to-br from-green-600 to-green-800" activeColor="ring-2 ring-green-500 ring-offset-2 ring-offset-slate-900" />
         <button 
             onClick={() => handleSegmentClick(0)}
-            className="bg-gradient-to-br from-slate-600 to-slate-700 border-b-4 border-slate-900 text-white rounded-xl font-bold text-xs uppercase hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all shadow-lg active:shadow-none"
+          className="bg-gradient-to-br from-slate-600 to-slate-700 border-b-4 border-slate-900 text-white rounded-xl font-bold text-xs uppercase hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all shadow-lg active:shadow-none flex items-center justify-center gap-1"
         >
-            MISS
+          <span aria-hidden>⨯</span> MISS
         </button>
-         <button 
+         {onUndo && (
+           <button 
             onClick={onUndo} 
-            className="bg-gradient-to-br from-yellow-600 to-yellow-700 border-b-4 border-yellow-900 text-white rounded-xl font-bold text-xs uppercase hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all shadow-lg active:shadow-none"
-        >
-            Undo
-        </button>
+            className="bg-gradient-to-br from-yellow-600 to-yellow-700 border-b-4 border-yellow-900 text-white rounded-xl font-bold text-xs uppercase hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all shadow-lg active:shadow-none flex items-center justify-center gap-1"
+           >
+            ↺ Undo
+           </button>
+         )}
       </div>
       
       {/* Target Indicator */}

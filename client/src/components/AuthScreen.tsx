@@ -118,7 +118,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                                 placeholder="Username"
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
                                 required
                             />
                         </div>
@@ -131,7 +131,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="Email Address"
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
                                 required
                             />
                         </div>
@@ -143,8 +143,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                placeholder={view === 'reset' ? "New Password" : "Password"}
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors"
+                                placeholder={view === 'reset' ? "New Password" : "Password (min 8 chars)"}
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
                                 required
                             />
                         </div>

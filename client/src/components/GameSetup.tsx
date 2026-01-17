@@ -14,6 +14,7 @@ const GameSetup = () => {
   const [filterPlayerId, setFilterPlayerId] = useState<string>("")
   const startGame = useGameStore(state => state.startGame)
   const [loading, setLoading] = useState(false)
+    const [formError, setFormError] = useState<string>("")
 
   // Auto-fill user
   useEffect(() => {
@@ -51,12 +52,21 @@ const GameSetup = () => {
 
   const handleStart = async () => {
     // Filter empty names
-    const validPlayers = players.map(p => p.trim()).filter(p => p !== '')
+    const trimmed = players.map(p => p.trim())
+    const validPlayers = trimmed.filter(p => p !== '')
+    const hasDuplicate = new Set(validPlayers).size !== validPlayers.length
     
     if (validPlayers.length < 1) {
-        alert("Please add at least 1 player.")
+        setFormError("Please add at least one player name.")
         return
     }
+
+    if (hasDuplicate) {
+        setFormError("Player names must be unique.")
+        return
+    }
+
+    setFormError("")
 
     setLoading(true)
     try {
@@ -141,7 +151,7 @@ const GameSetup = () => {
                             <input 
                                 value={p} onChange={e => updatePlayerName(idx, e.target.value)}
                                 list="players-list"
-                                className="w-full bg-slate-900 border border-slate-700/50 group-hover:border-slate-600 focus:border-green-500 focus:ring-1 focus:ring-green-500/50 focus:bg-slate-800 p-4 rounded-2xl text-lg font-bold text-white outline-none transition-all placeholder:text-slate-600 placeholder:font-normal"
+                                className="w-full bg-slate-900 border border-slate-700/70 group-hover:border-slate-500 focus:border-green-500 focus:ring-1 focus:ring-green-500/50 focus:bg-slate-800 p-4 rounded-2xl text-lg font-bold text-white outline-none transition-all placeholder:text-slate-400 placeholder:font-semibold"
                                 placeholder={`Player Name`}
                             />
                             {/* Autocomplete Datalist */}
@@ -201,11 +211,20 @@ const GameSetup = () => {
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                                <div className="space-y-2">
+                                        {formError && (
+                                            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2">{formError}</div>
+                                        )}
+
+                                        <p className="text-xs text-slate-500 flex items-center gap-2">
+                                            <span aria-hidden>❔</span>
+                                            Tip: Tap Double/Triple then a number. Unique names are required.
+                                        </p>
+
                     <button 
                         onClick={handleStart}
-                        disabled={loading || players.filter(p => p.trim()).length < 1}
-                        className="group relative w-full bg-gradient-to-br from-green-500 to-emerald-700 hover:from-green-400 hover:to-emerald-600 text-white font-black py-6 rounded-2xl text-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:shadow-none overflow-hidden"
+                                                disabled={loading || players.map(p => p.trim()).filter(Boolean).length < 1 || new Set(players.map(p => p.trim()).filter(Boolean)).size !== players.map(p => p.trim()).filter(Boolean).length}
+                                                className="group relative w-full bg-gradient-to-br from-green-500 to-emerald-700 hover:from-green-400 hover:to-emerald-600 text-white font-black py-6 rounded-2xl text-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:from-green-500 disabled:hover:to-emerald-700 overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
                         <span className="relative flex items-center justify-center gap-3 tracking-wider group-hover:gap-6 transition-all">

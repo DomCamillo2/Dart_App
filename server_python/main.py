@@ -234,15 +234,22 @@ def create_game(game: GameCreate):
             cur.execute("INSERT INTO games (start_score) VALUES (%s) RETURNING id", (game.start_score,))
             game_id = cur.fetchone()['id']
 
-            # 3. Link Participants
-            for idx, pid in enumerate(player_ids):
+            # 3. Link Participants (dedupe to avoid PK violation if the same player name is sent twice)
+            unique_player_ids = []
+            seen = set()
+            for pid in player_ids:
+                if pid not in seen:
+                    unique_player_ids.append(pid)
+                    seen.add(pid)
+
+            for idx, pid in enumerate(unique_player_ids):
                 cur.execute(
                     "INSERT INTO game_participants (game_id, player_id, turn_order) VALUES (%s, %s, %s)",
                     (game_id, pid, idx + 1)
                 )
             
             conn.commit()
-            return {"game_id": game_id, "player_ids": player_ids}
+            return {"game_id": game_id, "player_ids": unique_player_ids}
 
 def calculate_game_state(start_score, players, throws):
     # Initialize scores map: player_id -> score

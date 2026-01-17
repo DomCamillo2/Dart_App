@@ -60,8 +60,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000", 
-        "https://dart-frontend1.onrender.com",
-        "https://dart-frontend-8245.onrender.com"
+        "https://dart-frontend1.onrender.com",          # legacy frontend URL
+        "https://dart-frontend-8245.onrender.com"        # current frontend URL
     ],
     allow_credentials=True,
     allow_methods=["*"],

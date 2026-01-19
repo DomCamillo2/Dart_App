@@ -16,6 +16,8 @@ services:
         sync: false # Musst du manuell im Dashboard eintragen (Sicherheit!)
       - key: MAILGUN_DOMAIN
         value: sandbox64b84171150447e2a8964210a106f64a.mailgun.org
+      - key: MAILGUN_API_URL
+        value: https://api.mailgun.net/v3 # Ändere zu https://api.eu.mailgun.net/v3 für EU-Accounts
 
   # 2. Das Frontend (React Website)
   - type: web

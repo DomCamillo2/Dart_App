@@ -18,7 +18,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
 # Mailgun Configuration
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN", "sandbox64b84171150447e2a8964210a106f64a.mailgun.org")
-MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY", "API_KEY") # You should set this in docker-compose or .env
+MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY", "API_KEY") 
+MAILGUN_API_URL = os.getenv("MAILGUN_API_URL", "https://api.mailgun.net/v3") # Use https://api.eu.mailgun.net/v3 for EU
 
 app = FastAPI()
 
@@ -128,21 +129,22 @@ def forgot_password(req: ForgotPasswordRequest):
             
             # Send Email via Mailgun
             try:
-                # We won't really send if API key is dummy, but we try
+                # We won't really send if API key is dummy (default value)
                 if MAILGUN_API_KEY != "API_KEY":
                      print(f"Attempting to send email to {req.email} via {MAILGUN_DOMAIN}...")
                      response = requests.post(
-                        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
+                        f"{MAILGUN_API_URL}/{MAILGUN_DOMAIN}/messages",
                         auth=("api", MAILGUN_API_KEY),
                         data={
                             "from": f"Dart App <postmaster@{MAILGUN_DOMAIN}>",
                             "to": req.email,
-                            "subject": "Password Reset - Dart App",
-                            "text": f"Hi {player['name']},\n\nSomeone requested a password reset for your account.\n\nHere is your token: {reset_token}\n\n(In a real app this would be a clickable link)"
+                            "subject": "Reset Your Password - Dart App",
+                            "text": f"Hi {player['name']},\n\nWe received a request to reset your password.\n\nPlease copy the following token and paste it into the app to reset your password:\n\n{reset_token}\n\nIf you did not request this, please ignore this email."
                         }
                     )
                      print(f"Mailgun Response Status: {response.status_code}")
-                     print(f"Mailgun Response Body: {response.text}")
+                     if response.status_code != 200:
+                         print(f"Error Body: {response.text}")
                      response.raise_for_status()
             except Exception as e:
                 print(f"Failed to send email: {e}")

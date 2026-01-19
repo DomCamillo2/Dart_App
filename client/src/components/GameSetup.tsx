@@ -256,9 +256,6 @@ const GameSetup = () => {
                 </div>
 
                                 <div className="space-y-2">
-                                        {formError && (
-                                            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2">{formError}</div>
-                                        )}
 
                                         <p className="text-xs text-slate-500 flex items-center gap-2">
                                             <span aria-hidden>❔</span>

@@ -367,6 +367,7 @@ const GameSetup = () => {
             </div>
         </div>
     </div>
+    </>
   )
 }
 

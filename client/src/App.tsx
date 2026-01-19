@@ -170,9 +170,9 @@ function App() {
              <GameSetup />
          </div>
       ) : (
-        <div className="relative z-10 flex-1 flex flex-col items-center gap-4 w-full max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
+        <div className="relative z-10 flex-1 flex flex-col items-center gap-4 w-full max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
             {/* Header / Status Bar */}
-            <div className="w-full flex justify-between items-center px-4 py-3 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl">
+            <div className="w-full max-w-lg flex justify-between items-center px-4 py-3 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl">
                   <button
                    onClick={resetGame}
                    className="text-left text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 hover:from-green-100 hover:to-emerald-200 transition-colors"

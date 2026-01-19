@@ -12,9 +12,9 @@ const Scoreboard = () => {
   // For now: Just Show Score. We will add Avg later when we track Darts Count per player.
 
   return (
-    <div className="w-full max-w-4xl mx-auto"> 
+    <div className="w-full"> 
       {/* Scrollable Container for Players */}
-      <div className="flex gap-4 overflow-x-auto pb-8 pt-4 px-4 snap-x snap-mandatory custom-scrollbar items-center md:justify-center min-h-[200px]">
+      <div className="flex gap-4 overflow-x-auto pb-10 pt-8 px-8 snap-x snap-mandatory scrollbar-hide items-center md:justify-center min-h-[220px]">
       {players.map((p, idx) => {
         const isCurrent = idx === currentPlayerIndex
         const suggestion = isCurrent && p.score <= 170 ? getCheckoutSuggestion(p.score) : null

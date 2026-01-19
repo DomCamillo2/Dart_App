@@ -219,37 +219,49 @@ def get_player_history(player_id: str):
 def create_game(game: GameCreate):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            # 1. Create Players if they don't exist and get IDs
-            player_ids = []
-            for name in game.player_names:
-                cur.execute("SELECT id FROM players WHERE name = %s", (name,))
-                res = cur.fetchone()
-                if res:
-                    player_ids.append(res['id'])
+            # 1. Optimize Player Retrieval/Creation
+            names = [n.strip() for n in game.player_names if n.strip()]
+            if not names:
+                raise HTTPException(status_code=400, detail="At least one player required")
+
+            # Fetch all existing players in one go
+            # Psycopg3 adapts lists to arrays automatically
+            cur.execute("SELECT name, id FROM players WHERE name = ANY(%s)", (names,))
+            existing_map = {row['name']: row['id'] for row in cur.fetchall()}
+            
+            final_player_ids = []
+            
+            # Create missing players
+            for name in names:
+                if name in existing_map:
+                    final_player_ids.append(existing_map[name])
                 else:
                     cur.execute("INSERT INTO players (name) VALUES (%s) RETURNING id", (name,))
-                    player_ids.append(cur.fetchone()['id'])
-            
+                    new_id = cur.fetchone()['id']
+                    existing_map[name] = new_id # Cache it
+                    final_player_ids.append(new_id)
+
             # 2. Create Game
             cur.execute("INSERT INTO games (start_score) VALUES (%s) RETURNING id", (game.start_score,))
             game_id = cur.fetchone()['id']
 
-            # 3. Link Participants (dedupe to avoid PK violation if the same player name is sent twice)
-            unique_player_ids = []
+            # 3. Link Participants (deduplicated by ID to be safe)
+            unique_ids = []
             seen = set()
-            for pid in player_ids:
+            for pid in final_player_ids:
                 if pid not in seen:
-                    unique_player_ids.append(pid)
+                    unique_ids.append(pid)
                     seen.add(pid)
 
-            for idx, pid in enumerate(unique_player_ids):
-                cur.execute(
-                    "INSERT INTO game_participants (game_id, player_id, turn_order) VALUES (%s, %s, %s)",
-                    (game_id, pid, idx + 1)
-                )
+            # Batch Insert using executemany
+            params = [(game_id, pid, idx + 1) for idx, pid in enumerate(unique_ids)]
+            cur.executemany(
+                "INSERT INTO game_participants (game_id, player_id, turn_order) VALUES (%s, %s, %s)", 
+                params
+            )
             
             conn.commit()
-            return {"game_id": game_id, "player_ids": unique_player_ids}
+            return {"game_id": game_id, "player_ids": unique_ids}
 
 def calculate_game_state(start_score, players, throws):
     # Initialize scores map: player_id -> score

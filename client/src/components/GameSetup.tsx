@@ -170,7 +170,14 @@ const GameSetup = () => {
             </div>
             
             {/* Dynamic Player List */}
-            <div className="space-y-4 mb-8 overflow-y-auto pr-2 custom-scrollbar shrink min-h-[150px]">
+            <fieldset className="space-y-4 mb-8 overflow-y-auto pr-2 custom-scrollbar shrink min-h-[150px] border-none m-0 p-0">
+                <legend className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur-md w-full pb-2 mb-2 text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 border-b border-slate-800/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Players
+                </legend>
+                
                 {players.map((p, idx) => {
                     const error = touched[idx] ? getPlayerError(p, idx) : null;
                     const inputId = `player-input-${idx}`;
@@ -178,7 +185,9 @@ const GameSetup = () => {
                     
                     return (
                     <div key={idx} className="group relative flex flex-col gap-1 transition-all animate-in fade-in slide-in-from-left-4 duration-300">
-                        <label htmlFor={inputId} className="sr-only">Player {idx + 1} Name</label> 
+                        <label htmlFor={inputId} className="text-[10px] font-bold text-slate-500 ml-12 uppercase tracking-wider mb-0.5 block">
+                            Player {idx + 1} Name
+                        </label> 
                         <div className="flex items-center gap-3">
                             {/* Number Badge */}
                             <div className={`
@@ -193,6 +202,7 @@ const GameSetup = () => {
                                     id={inputId}
                                     value={p} 
                                     onChange={e => updatePlayerName(idx, e.target.value)}
+                                    // ... rest matches existing code structure ...
                                     onBlur={() => markTouched(idx)}
                                     list="players-list"
                                     aria-invalid={!!error}
@@ -201,7 +211,7 @@ const GameSetup = () => {
                                         w-full bg-slate-900 border p-4 rounded-2xl text-lg font-bold text-white outline-none transition-all placeholder:text-slate-400 placeholder:font-semibold pr-12
                                         ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5' : 'border-slate-700/70 group-hover:border-slate-500 focus:border-green-500 focus:ring-green-500/50'}
                                     `}
-                                    placeholder={`Player Name`}
+                                    placeholder={`e.g. "The Power"`}
                                 />
                                 {/* Error Icon inside input */}
                                 {error && (
@@ -243,21 +253,30 @@ const GameSetup = () => {
                 
                 <button 
                     onClick={addPlayerSlot}
-                    className="w-full py-4 border-2 border-dashed border-slate-800 text-slate-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:border-green-500/50 hover:text-green-400 hover:bg-green-500/5 transition-all group"
+                    className="w-full py-4 border-2 border-dashed border-slate-800 text-slate-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:border-green-500/50 hover:text-green-400 hover:bg-green-500/5 transition-all group flex items-center justify-center gap-3"
+                    title="Add another player to the match"
                 >
-                    <span className="group-hover:tracking-[0.2em] transition-all">+ Add Player Slot</span>
+                    <div className="bg-slate-800 group-hover:bg-green-500 rounded-lg p-1 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <span className="group-hover:tracking-[0.2em] transition-all">Add Player Slot</span>
                 </button>
-            </div>
+            </fieldset>
 
             {/* Controls Footer */}
             <div className="shrink-0 pt-6 border-t border-slate-800/50">
-                <div className="grid grid-cols-5 gap-4 mb-6">
-                    <div className="col-span-2 flex items-center">
-                         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Target Score</span>
-                    </div>
+                <fieldset className="mb-6">
+                    <legend className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                         </svg>
+                         Starting Score
+                    </legend>
                     {/* Game Mode Toggles */}
-                    <div className="col-span-3 grid grid-cols-2 gap-3">
-                        {[301, 501].map(target => (
+                    <div className="grid grid-cols-4 gap-3">
+                        {[301, 501, 701].map(target => (
                             <button 
                                 key={target}
                                 onClick={() => setScore(target)}
@@ -274,8 +293,24 @@ const GameSetup = () => {
                                 )}
                             </button>
                         ))}
+                        
+                        <div className="relative group">
+                             <input 
+                                type="number"
+                                value={score}
+                                onChange={(e) => setScore(Math.max(1, parseInt(e.target.value) || 0))}
+                                className={`
+                                    w-full h-full bg-slate-900/50 border rounded-xl text-center font-bold outline-none transition-all text-sm
+                                    ${![301, 501, 701].includes(score) 
+                                        ? 'border-green-500 text-green-400 ring-1 ring-green-500/20' 
+                                        : 'border-slate-700 text-slate-500 focus:border-green-500 focus:text-white'}
+                                `}
+                                placeholder="Custom"
+                                aria-label="Custom starting score"
+                            />
+                        </div>
                     </div>
-                </div>
+                </fieldset>
 
                                 <div className="space-y-2">
 
@@ -301,7 +336,7 @@ const GameSetup = () => {
                                 </>
                             ) : (
                                 <>
-                                START MATCH
+                                BEGIN MATCH
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -309,6 +344,12 @@ const GameSetup = () => {
                             )}
                         </span>
                     </button>
+                    
+                    {!isFormValid && players.length > 0 && (
+                        <div className="mt-2 text-center text-red-500 text-xs font-bold animate-pulse" role="alert">
+                            Please fix the errors above to start.
+                        </div>
+                    )}
 
                     <div className="flex justify-center mt-4">
                         <button 

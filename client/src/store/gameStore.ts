@@ -11,11 +11,12 @@ interface GameState {
   gameId: string | null
   players: Player[]
   currentPlayerIndex: number
+  dartsThrown: number
   startScore: number
   winner: Player | null
   
-  // New: Track local history for undo
-  history: { players: Player[], currentPlayerIndex: number }[]
+  // Track local history for undo
+  history: { players: Player[], currentPlayerIndex: number, dartsThrown: number }[]
   
   // Setup Actions
   startGame: (gameId: string, players: Player[], startScore: number) => void
@@ -24,6 +25,7 @@ interface GameState {
   
   // Game Actions
   updateScore: (playerId: string, newScore: number) => void
+  setDartsThrown: (n: number) => void
   nextTurn: () => void
   
   // Undo Support
@@ -37,6 +39,7 @@ export const useGameStore = create<GameState>()(
       gameId: null,
       players: [],
       currentPlayerIndex: 0,
+      dartsThrown: 0,
       startScore: 501,
       winner: null,
       history: [],
@@ -46,12 +49,13 @@ export const useGameStore = create<GameState>()(
         players, 
         startScore,
         currentPlayerIndex: 0,
+        dartsThrown: 0,
         winner: null,
         history: []
       }),
 
       setWinner: (player) => set({ winner: player }),
-      resetGame: () => set({ gameId: null, players: [], winner: null, history: [] }),
+      resetGame: () => set({ gameId: null, players: [], winner: null, history: [], dartsThrown: 0 }),
 
       updateScore: (playerId, newScore) => set((state) => ({
         players: state.players.map(p => 
@@ -59,8 +63,11 @@ export const useGameStore = create<GameState>()(
         )
       })),
 
+      setDartsThrown: (n) => set({ dartsThrown: n }),
+
       nextTurn: () => set((state) => ({
-        currentPlayerIndex: (state.currentPlayerIndex + 1) % state.players.length
+        currentPlayerIndex: (state.currentPlayerIndex + 1) % state.players.length,
+        dartsThrown: 0
       })),
 
       pushHistory: () => {
@@ -68,7 +75,8 @@ export const useGameStore = create<GameState>()(
         set(s => ({
             history: [...s.history, { 
                 players: JSON.parse(JSON.stringify(s.players)), // Deep copy 
-                currentPlayerIndex: s.currentPlayerIndex 
+                currentPlayerIndex: s.currentPlayerIndex,
+                dartsThrown: s.dartsThrown
             }]
         }))
       },
@@ -81,6 +89,7 @@ export const useGameStore = create<GameState>()(
         set({
             players: lastState.players,
             currentPlayerIndex: lastState.currentPlayerIndex,
+            dartsThrown: lastState.dartsThrown,
             history: history.slice(0, -1),
             winner: null
         })

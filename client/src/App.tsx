@@ -9,9 +9,9 @@ import AuthScreen from './components/AuthScreen'
 import { API_URL } from './config'
 
 function App() {
-  const { gameId, players, currentPlayerIndex, updateScore, nextTurn, setWinner, resetGame } = useGameStore()
+  const { gameId, players, currentPlayerIndex, updateScore, nextTurn, setWinner, resetGame,
+          dartsThrown, setDartsThrown, pushHistory, popHistory } = useGameStore()
   const { user, isGuest, login, setGuest, logout } = useAuthStore()
-  const [dartsThrown, setDartsThrown] = useState<number>(0)
   const [lastThrows, setLastThrows] = useState<{ player: string; value: number; multiplier: number; isBust?: boolean; isWin?: boolean }[]>([])
   const [turnStartScore, setTurnStartScore] = useState<number | null>(null)
   
@@ -41,7 +41,6 @@ function App() {
     const current = players[currentPlayerIndex]
     if (current) {
       setTurnStartScore(current.score)
-      setDartsThrown(0)
     }
     // Intentionally not including players to avoid resetting mid-turn when scores update
   }, [gameId, currentPlayerIndex])
@@ -49,6 +48,9 @@ function App() {
   const handleThrow = async (multiplier: number, value: number) => {
     if (!gameId) return
     
+    // SAVE HISTORY FOR UNDO
+    pushHistory()
+
     // 1. Calculate Score
     const points = multiplier * value
     const currentPlayer = players[currentPlayerIndex]
@@ -61,7 +63,20 @@ function App() {
 
     if (newScore === 0) {
       updateScore(currentPlayer.id, 0)
-      setWinner({ ...currentPlayer, score: 0 })
+      const winner = { ...currentPlayer, score: 0 }
+      setWinner(winner)
+      
+      // Save for guest history
+      if (isGuest) {
+          const gameResult = {
+              created_at: new Date().toISOString(),
+              winner_name: winner.name,
+              start_score: useGameStore.getState().startScore,
+              id: gameId
+          }
+          localStorage.setItem('last_game_result', JSON.stringify(gameResult))
+      }
+
       throwEntry.isWin = true
       fetch(`${API_URL}/api/games/${gameId}/throw`, {
         method: 'POST',
@@ -81,7 +96,10 @@ function App() {
       }).catch(e => console.error(e))
       updateScore(currentPlayer.id, startingScore)
       setLastThrows(prev => [throwEntry, ...prev].slice(0, 6))
-      setDartsThrown(0)
+      
+      // Reset Darts Thrown on Bust? Usually yes.
+      // But standard rules say turn ends.
+      // nextTurn() handles dartsThrown reset in store.
       nextTurn()
       return
     }
@@ -100,14 +118,17 @@ function App() {
     // 3. Turn Management
     const nextDartCount = dartsThrown + 1
     if (nextDartCount >= 3) {
-        setDartsThrown(0)
         nextTurn()
     } else {
         setDartsThrown(nextDartCount)
     }
   }
 
-  // Hide undo for now to avoid misleading users
+  const handleUndo = () => {
+      popHistory()
+      // Remove last throw entry visually
+      setLastThrows(prev => prev.slice(1))
+  }
 
   if (!gameId && !user && !isGuest) {
      return <AuthScreen onLogin={(token, username, id) => login({ token, username, id })} onGuest={setGuest} />
@@ -205,7 +226,7 @@ function App() {
            </div>
 
            <div className="flex-1 w-full flex items-end pb-4">
-                <Keypad onThrow={handleThrow} />
+                <Keypad onThrow={handleThrow} onUndo={handleUndo} />
            </div>
 
            {/* Recent Throws */}

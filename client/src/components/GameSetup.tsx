@@ -205,7 +205,7 @@ const GameSetup = () => {
                         {error && (
                             <div id={errorId} className="text-red-400 text-xs font-bold pl-12 flex items-center gap-1 animate-in slide-in-from-top-1">
                                 <span className="sr-only">Error:</span>
-                                {error === "Name must be unique" ? error + ". Please change the highlighted fields." : error}
+                                {error === "Player names must be unique" ? error + ". Please change the highlighted fields." : error}
                             </div>
                         )}
                     </div>

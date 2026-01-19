@@ -40,8 +40,8 @@ const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
       className={twMerge(
         "relative overflow-hidden h-12 text-sm font-black tracking-wider uppercase rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg border-[3px] focus:outline-none focus:ring-4 focus:ring-blue-500",
         multiplier === val 
-          ? `bg-slate-100 text-slate-900 border-white translate-y-1 shadow-none ${activeColor}` 
-          : `${color} border-[rgba(255,255,255,0.1)] text-white hover:brightness-110 shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]`
+          ? `bg-slate-100 dark:bg-slate-100 text-slate-900 border-white translate-y-1 shadow-none ${activeColor}` 
+          : `${color} border-white/10 dark:border-white/10 text-white hover:brightness-110 shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]`
       )}
       title={`Select ${label} Multiplier (x${val})`}
       aria-label={`Select ${label} Multiplier`}
@@ -78,11 +78,11 @@ const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full max-w-md mx-auto select-none mt-auto p-4 bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-2xl">
+    <div className="flex flex-col gap-3 w-full max-w-md mx-auto select-none mt-auto p-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl transition-colors">
       {/* Modifiers Row */}
       <div className="grid grid-cols-4 gap-2 mb-1" role="group" aria-label="Score Modifiers">
-        <MultiplierBtn val={2} label="Double" color="bg-gradient-to-br from-red-600 to-red-800" activeColor="ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900" />
-        <MultiplierBtn val={3} label="Triple" color="bg-gradient-to-br from-green-600 to-green-800" activeColor="ring-2 ring-green-500 ring-offset-2 ring-offset-slate-900" />
+        <MultiplierBtn val={2} label="Double" color="bg-gradient-to-br from-red-600 to-red-800" activeColor="ring-2 ring-red-500 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-900" />
+        <MultiplierBtn val={3} label="Triple" color="bg-gradient-to-br from-green-600 to-green-800" activeColor="ring-2 ring-green-500 ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-900" />
         <button 
             onClick={() => handleSegmentClick(0)}
           className="bg-gradient-to-br from-slate-600 to-slate-700 border-b-4 border-slate-900 text-white rounded-xl font-bold text-xs uppercase hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all shadow-lg active:shadow-none flex items-center justify-center gap-1 focus:outline-none focus:ring-4 focus:ring-blue-500"
@@ -104,8 +104,8 @@ const Keypad: React.FC<KeypadProps> = ({ onThrow, onUndo }) => {
       
       {/* Target Indicator */}
       <div className={`
-        text-center text-[11px] font-black uppercase tracking-[0.4em] bg-slate-950 py-2 rounded-lg border border-white/10 transition-colors duration-300
-        ${multiplier === 3 ? 'text-green-400 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : multiplier === 2 ? 'text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(248,113,113,0.2)]' : 'text-slate-400'}
+        text-center text-[11px] font-black uppercase tracking-[0.4em] bg-slate-100 dark:bg-slate-950 py-2 rounded-lg border transition-colors duration-300
+        ${multiplier === 3 ? 'text-green-600 dark:text-green-400 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : multiplier === 2 ? 'text-red-500 dark:text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(248,113,113,0.2)]' : 'text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10'}
       `} aria-live="polite">
           {multiplier === 3 ? 'Target: Triple (x3)' : multiplier === 2 ? 'Target: Double (x2)' : 'Target: Single (x1)'}
       </div>

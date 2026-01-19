@@ -35,20 +35,26 @@ const WinnerModal = () => {
     if (!winner) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+        <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+            role="dialog"
+            aria-labelledby="winner-title"
+            aria-modal="true"
+        >
             <div className="bg-slate-900 border-2 border-green-500 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(34,197,94,0.3)] transform scale-100 animate-in zoom-in-95 duration-300">
-                <div className="mb-6">
+                <div className="mb-6" aria-hidden="true">
                     <span className="text-6xl">🏆</span>
                 </div>
                 
                 <h2 className="text-xl font-bold text-slate-400 uppercase tracking-widest mb-2">Winner</h2>
-                <h1 className="text-5xl font-black text-white mb-8 drop-shadow-lg break-words">
+                <h1 id="winner-title" className="text-5xl font-black text-white mb-8 drop-shadow-lg break-words">
                     {winner.name}
                 </h1>
 
                 <button 
                     onClick={resetGame}
-                    className="w-full bg-green-500 hover:bg-green-400 text-black font-black text-xl py-4 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20"
+                    className="w-full bg-green-500 hover:bg-green-400 text-black font-black text-xl py-4 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 focus:outline-none focus:ring-4 focus:ring-green-500/50"
+                    autoFocus
                 >
                     PLAY AGAIN
                 </button>

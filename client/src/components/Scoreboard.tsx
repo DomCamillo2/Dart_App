@@ -35,17 +35,20 @@ const Scoreboard = () => {
 
             {isCurrent && (
                <>
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600 text-black text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-[0_2px_10px_rgba(34,197,94,0.4)] animate-in slide-in-from-top-2 duration-300 z-20 whitespace-nowrap">
-                    Throwing
+                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-100 text-green-900 border border-green-600 text-[12px] font-black uppercase tracking-widest py-1 px-4 rounded-full shadow-[0_2px_10px_rgba(34,197,94,0.4)] animate-in slide-in-from-top-2 duration-300 z-20 whitespace-nowrap flex items-center gap-1">
+                    <span>Targeting</span>
+                    <span className="sr-only">Current Player</span>
                  </div>
-                 <div className="absolute inset-0 bg-green-500/5 animate-pulse rounded-[2rem]"></div>
+                 <div className="absolute inset-0 border-4 border-green-500 rounded-[2rem] animate-pulse pointer-events-none"></div>
                </>
             )}
             
             <div className="relative z-10 flex flex-col items-center w-full">
-                <span className={`text-xs md:text-sm uppercase font-bold tracking-[0.2em] mb-2 transition-colors duration-300 truncate w-full text-center ${isCurrent ? 'text-green-400' : 'text-slate-400'}`}>
+                <span className={`text-sm md:text-base uppercase font-bold tracking-[0.2em] mb-2 transition-colors duration-300 truncate w-full text-center ${isCurrent ? 'text-green-300' : 'text-slate-300'}`}>
                     {p.name}
                 </span>
+
+                {isCurrent && <span className="sr-only">Current Score:</span>}
                 
                 {/* Score Number with 3D drop shadow */}
                 <div className="relative">
@@ -53,7 +56,7 @@ const Scoreboard = () => {
                         className={`font-mono font-black transition-all duration-300 leading-none
                         ${isCurrent 
                             ? 'text-5xl md:text-7xl text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]' 
-                            : 'text-3xl md:text-5xl text-slate-500 blur-[0.5px]'}
+                            : 'text-3xl md:text-5xl text-slate-400 blur-[0.5px]'}
                         `}
                         style={{ textShadow: isCurrent ? '0 0 30px rgba(34,197,94,0.2)' : 'none' }}
                     >
@@ -65,12 +68,12 @@ const Scoreboard = () => {
             {/* Checkout Hint - Floating Glass Pill */}
             {suggestion && (
               <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[150%] 
-                              bg-slate-950/90 backdrop-blur-xl border border-green-500/30 
+                              bg-slate-900/95 backdrop-blur-xl border border-green-500 
                               px-3 py-2 rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.5)] 
                               animate-in slide-in-from-bottom-2 fade-in duration-300 z-30
                               flex flex-col items-center gap-1 pointer-events-none">
-                 <span className="text-[9px] text-green-500/70 font-bold uppercase tracking-widest leading-none">Checkout</span>
-                 <span className="text-green-400 text-xs md:text-sm font-mono font-bold whitespace-nowrap">{suggestion}</span>
+                 <span className="text-[10px] text-green-300 font-bold uppercase tracking-widest leading-none">Checkout</span>
+                 <span className="text-white text-xs md:text-sm font-mono font-bold whitespace-nowrap">{suggestion}</span>
               </div>
             )}
           </div>
@@ -79,9 +82,9 @@ const Scoreboard = () => {
       </div>
       
       {/* Fixed Turn Indicator for heavy scrolling */}
-      <div className="md:hidden fixed top-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 backdrop-blur border border-green-500/20 px-4 py-1 rounded-full shadow-xl pointer-events-none opacity-80 transition-opacity duration-300">
-         <span className="text-[10px] text-slate-400 font-bold uppercase mr-2">Turn:</span>
-         <span className="text-xs text-green-400 font-bold uppercase">{players[currentPlayerIndex]?.name}</span>
+      <div className="md:hidden fixed top-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900 border border-green-500 px-4 py-2 rounded-full shadow-xl opacity-90 transition-opacity duration-300 flex items-center gap-2">
+         <span className="text-[10px] text-slate-300 font-bold uppercase">Turn:</span>
+         <span className="text-sm text-green-300 font-bold uppercase">{players[currentPlayerIndex]?.name}</span>
       </div>
     </div>
   )

@@ -5,19 +5,42 @@ interface HelpModalProps {
 }
 
 const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
+  // Focus Trap Logic (simple version)
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  
+  React.useEffect(() => {
+     const handleKeyDown = (e: KeyboardEvent) => {
+         if (e.key === 'Escape') onClose();
+     };
+     document.addEventListener('keydown', handleKeyDown);
+     // Focus the close button or modal on mount
+     modalRef.current?.focus();
+     return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        role="dialog"
+        aria-labelledby="help-title"
+        aria-modal="true"
+    >
+      <div 
+        ref={modalRef}
+        className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative outline-none"
+        tabIndex={-1}
+      >
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-2 rounded-full hover:bg-slate-800"
+          aria-label="Close Help"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <h2 className="text-2xl font-black italic text-white mb-6">How to Play <span className="text-green-500">X01</span></h2>
+        <h2 id="help-title" className="text-2xl font-black italic text-white mb-6">How to Play <span className="text-green-500">X01</span></h2>
 
         <div className="space-y-4 text-slate-300 text-sm overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
           <section>

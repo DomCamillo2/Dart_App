@@ -64,10 +64,14 @@ const GameSetup = () => {
 
   // Validation Logic
   const getPlayerError = (name: string, index: number) => {
+      // Empty check is fine, maybe could be more specific but "Name cannot be empty" is okay.
       if (!name.trim()) return "Name cannot be empty"
+      
       // Check duplicate
       const otherNames = players.filter((_, i) => i !== index).map(n => n.trim().toLowerCase())
-      if (otherNames.includes(name.trim().toLowerCase())) return "Name must be unique"
+      if (otherNames.includes(name.trim().toLowerCase())) {
+          return "Player names must be unique"
+      }
       return null
   }
 
@@ -169,29 +173,45 @@ const GameSetup = () => {
             <div className="space-y-4 mb-8 overflow-y-auto pr-2 custom-scrollbar shrink min-h-[150px]">
                 {players.map((p, idx) => {
                     const error = touched[idx] ? getPlayerError(p, idx) : null;
+                    const inputId = `player-input-${idx}`;
+                    const errorId = `player-error-${idx}`;
+                    
                     return (
                     <div key={idx} className="group relative flex flex-col gap-1 transition-all animate-in fade-in slide-in-from-left-4 duration-300">
+                        <label htmlFor={inputId} className="sr-only">Player {idx + 1} Name</label> 
                         <div className="flex items-center gap-3">
                             {/* Number Badge */}
                             <div className={`
                                 w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm border shadow-lg transform rotate-3 transition-colors shrink-0
-                                ${p.trim() ? 'bg-green-500 border-green-400 text-black' : 'bg-slate-800 border-slate-700 text-slate-500'}
+                                ${error ? 'bg-red-500/20 border-red-500 text-red-500' : (p.trim() ? 'bg-green-500 border-green-400 text-black' : 'bg-slate-800 border-slate-700 text-slate-500')}
                             `}>
                                 {idx + 1}
                             </div>
 
                             <div className="relative flex-1 group-focus-within:scale-[1.02] transition-transform duration-200">
                                 <input 
+                                    id={inputId}
                                     value={p} 
                                     onChange={e => updatePlayerName(idx, e.target.value)}
                                     onBlur={() => markTouched(idx)}
                                     list="players-list"
+                                    aria-invalid={!!error}
+                                    aria-describedby={error ? errorId : undefined}
                                     className={`
-                                        w-full bg-slate-900 border p-4 rounded-2xl text-lg font-bold text-white outline-none transition-all placeholder:text-slate-400 placeholder:font-semibold
-                                        ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-700/70 group-hover:border-slate-500 focus:border-green-500 focus:ring-green-500/50'}
+                                        w-full bg-slate-900 border p-4 rounded-2xl text-lg font-bold text-white outline-none transition-all placeholder:text-slate-400 placeholder:font-semibold pr-12
+                                        ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5' : 'border-slate-700/70 group-hover:border-slate-500 focus:border-green-500 focus:ring-green-500/50'}
                                     `}
                                     placeholder={`Player Name`}
                                 />
+                                {/* Error Icon inside input */}
+                                {error && (
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none animate-in fade-in zoom-in duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                )}
+
                                 {/* Autocomplete Datalist */}
                                 <datalist id="players-list">
                                     {availablePlayers.map(ap => (
@@ -204,6 +224,7 @@ const GameSetup = () => {
                                 <button 
                                     onClick={() => removePlayerSlot(idx)}
                                     className="w-12 h-12 flex items-center justify-center text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 shrink-0"
+                                    aria-label={`Remove Player ${idx + 1}`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -212,8 +233,9 @@ const GameSetup = () => {
                             )}
                         </div>
                         {error && (
-                            <div className="text-red-400 text-xs font-bold pl-12 animate-in slide-in-from-top-1">
-                                {error}
+                            <div id={errorId} className="text-red-400 text-xs font-bold pl-12 flex items-center gap-1 animate-in slide-in-from-top-1">
+                                <span className="sr-only">Error:</span>
+                                {error === "Name must be unique" ? error + ". Please change the highlighted fields." : error}
                             </div>
                         )}
                     </div>

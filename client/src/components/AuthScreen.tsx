@@ -96,16 +96,25 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
                     {getTitle()}
                 </h3>
 
-                {error && <div className="bg-red-500/10 text-red-500 p-3 rounded-lg text-sm mb-4 text-center">{error}</div>}
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm mb-4 text-center flex items-center justify-center gap-2" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {error}
+                    </div>
+                )}
                 {info && <div className="bg-green-500/10 text-green-500 p-3 rounded-lg text-sm mb-4 text-center">{info}</div>}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     {view === 'reset' && (
                          <div>
+                            <label htmlFor="resetToken" className="block text-slate-400 text-sm font-bold mb-2 ml-1">Reset Token</label>
                             <input 
+                                id="resetToken"
                                 value={resetToken}
                                 onChange={e => setResetToken(e.target.value)}
-                                placeholder="Reset Token"
+                                placeholder="Paste token from email"
                                 className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors"
                                 required
                             />
@@ -114,11 +123,13 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
 
                     {(view === 'login' || view === 'register') && (
                         <div>
+                            <label htmlFor="username" className="block text-slate-400 text-sm font-bold mb-2 ml-1">Username</label>
                             <input 
+                                id="username"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
-                                placeholder="Username"
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
+                                placeholder="e.g. MasterDart"
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-600"
                                 required
                             />
                         </div>
@@ -126,12 +137,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
 
                     {(view === 'register' || view === 'forgot') && (
                          <div>
+                            <label htmlFor="email" className="block text-slate-400 text-sm font-bold mb-2 ml-1">Email Address</label>
                             <input 
+                                id="email"
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                placeholder="Email Address"
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
+                                placeholder="user@example.com"
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-600"
                                 required
                             />
                         </div>
@@ -139,58 +152,81 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onGuest }) => {
 
                     {(view !== 'forgot') && (
                         <div>
+                            <label htmlFor="password" className="block text-slate-400 text-sm font-bold mb-2 ml-1">
+                                {view === 'reset' ? "New Password" : "Password"}
+                            </label>
                             <input 
+                                id="password"
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
-                                placeholder={view === 'reset' ? "New Password" : "Password (min 8 chars)"}
-                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-400"
+                                aria-describedby="password-hint"
+                                placeholder="••••••••"
+                                className="w-full bg-slate-950 border border-slate-800 focus:border-green-500 p-4 rounded-xl text-white outline-none transition-colors placeholder:text-slate-600"
                                 required
+                                minLength={8}
                             />
+                            <p id="password-hint" className="text-slate-500 text-xs mt-1 ml-1">
+                                Must be at least 8 characters long.
+                            </p>
                         </div>
                     )}
                     
-                    <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-green-900/20 uppercase tracking-wider">
-                        {view === 'login' && 'Login'}
-                        {view === 'register' && 'Register'}
+                    <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-green-900/20 uppercase tracking-wider mt-6">
+                        {view === 'login' && 'Sign In'}
+                        {view === 'register' && 'Register Account'}
                         {view === 'forgot' && 'Send Reset Link'}
                         {view === 'reset' && 'Update Password'}
                     </button>
                 </form>
 
-                <div className="mt-6 flex flex-col gap-4 text-center">
-                    {view === 'login' && (
-                        <>
-                            <button onClick={() => { setView('register'); setError(''); }} className="text-slate-500 hover:text-white transition-colors text-sm">
-                                Don't have an account? Register
-                            </button>
-                            <button onClick={() => { setView('forgot'); setError(''); }} className="text-slate-600 hover:text-slate-400 transition-colors text-xs">
-                                Forgot password?
-                            </button>
-                        </>
-                    )}
-                    
-                    {view === 'register' && (
-                        <button onClick={() => { setView('login'); setError(''); }} className="text-slate-500 hover:text-white transition-colors text-sm">
-                            Already have an account? Login
-                        </button>
-                    )}
+                <div className="mt-8 flex flex-col gap-3">
+                    {/* Primary Actions Group */}
+                    <div className="bg-slate-800/30 rounded-2xl p-4 flex flex-col gap-3 border border-slate-800/50">
+                        {view === 'login' && (
+                            <>
+                                <div className="text-center text-slate-400 text-sm mb-1">New to Dart X01?</div>
+                                <button onClick={() => { setView('register'); setError(''); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors text-sm border border-slate-700">
+                                    Create Account
+                                </button>
+                                <button onClick={() => { setView('forgot'); setError(''); }} className="text-slate-500 hover:text-slate-300 transition-colors text-xs text-center mt-1">
+                                    Forgot password?
+                                </button>
+                            </>
+                        )}
+                        
+                        {view === 'register' && (
+                             <>
+                                <div className="text-center text-slate-400 text-sm mb-1">Already have an account?</div>
+                                <button onClick={() => { setView('login'); setError(''); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors text-sm border border-slate-700">
+                                    Sign In instead
+                                </button>
+                            </>
+                        )}
 
-                   {(view === 'forgot' || view === 'reset') && (
-                        <button onClick={() => { setView('login'); setError(''); }} className="text-slate-500 hover:text-white transition-colors text-sm">
-                            Back to Login
-                        </button>
-                    )}
-
-                    
-                    <div className="border-t border-slate-800 pt-4">
-                        <button 
-                            onClick={onGuest}
-                            className="text-slate-400 hover:text-green-400 transition-colors font-bold uppercase tracking-wider text-xs"
-                        >
-                            Continue as Guest
-                        </button>
+                        {(view === 'forgot' || view === 'reset') && (
+                            <button onClick={() => { setView('login'); setError(''); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors text-sm border border-slate-700">
+                                Back to Login
+                            </button>
+                        )}
                     </div>
+
+                    {/* Guest Option */}
+                    <div className="flex items-center gap-4 py-2">
+                        <div className="h-px bg-slate-800 flex-1"></div>
+                        <span className="text-slate-600 text-xs font-bold uppercase">or</span>
+                        <div className="h-px bg-slate-800 flex-1"></div>
+                    </div>
+                    
+                    <button 
+                        onClick={onGuest}
+                        className="w-full py-3 text-slate-400 hover:text-green-400 hover:bg-green-400/5 border border-transparent hover:border-green-500/20 rounded-xl transition-all font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                    >
+                        <span>Continue as Guest</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
